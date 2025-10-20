@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LimeArch Ai</title>
+    <!-- Tailwind CSS & Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Image Comparison Slider -->
+    <link rel="stylesheet" href="https://unpkg.com/img-comparison-slider@8/dist/styles.css" />
+    <script src="https://unpkg.com/img-comparison-slider@8/dist/index.js" defer></script>
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        // Set worker URL before any other pdf.js call
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+        }
+    </script>
+    <style>
+        :root {
+            --bg-color: #212121; /* Koyu Gri Arkaplan (ORİJİNAL) */
+            --text-color: #e5e7eb;
+            --text-color-light: #9ca3af;
+            --card-bg: rgba(39, 39, 42, 0.5); /* Adjusted for new bg */
+            --card-border: rgba(63, 63, 70, 0.7); /* Adjusted for new bg */
+            --gradient-text-color: #e5e7eb; /* Light grey/white for text */
+            --action-btn-bg: #10b981;
+            --action-btn-hover-bg: #34d399;
+            --action-btn-text: #ffffff;
+            --module-btn-bg: #27272a; /* Lighter than background */
+            --upload-hover-border: #ff8c00;
+            --upload-hover-bg: rgba(255, 140, 0, 0.05);
+            --modal-bg: rgba(0, 0, 0, 0.75);
+            --modal-lightbox-bg: rgba(0, 0, 0, 0.9);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            /* Neumorphic Shadows for Dark Mode */
+            --neumorphic-shadow-light: rgba(211, 211, 211, 0.25); /* Light grey glow */
+            --neumorphic-shadow-dark: rgba(0, 0, 0, 0.6);
+            --theme-thumb-color: #ffffff; /* White color for toggle */
+            --separator-color: #616161; /* Dark mode separator - Made lighter */
+        }
+
+        body.light-mode {
+            --bg-color: #E9E3CE; /* Slightly darker background */
+            --text-color: #4A443D;
+            --text-color-light: #4b5563;
+            --card-bg: rgba(253, 250, 242, 0.8);
+            --card-border: rgba(234, 231, 223, 0.9);
+            --gradient-text-color: #a9a9a9; /* Light grey for text */
+            --action-btn-bg: #6B8E23;
+            --action-btn-hover-bg: #85ac2f;
+            --action-btn-text: #ffffff;
+            --module-btn-bg: #E1D5B7; /* 3x darker cream for buttons */
+            --upload-hover-border: #a9a9a9;
+            --upload-hover-bg: rgba(169, 169, 169, 0.05);
+            --shadow-color: rgba(0,0,0,0.08);
+            /* Neumorphic Shadows for Light Mode */
+            --neumorphic-shadow-light: rgba(255, 255, 255, 0.7); /* More visible light glow */
+            --neumorphic-shadow-dark: rgba(170, 160, 140, 0.75); /* Creamy shadow - Made 3x Darker */
+            --theme-thumb-color: #967259; /* Brown color for toggle thumb */
+            --separator-color: #967259; /* Brown color for separator */
+        }
+
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* ORİJİNAL KOYU ARKA PLAN DESENLERİ */
+            background-image: url('https://www.transparenttextures.com/patterns/futuristic-v2.png');
+            background-blend-mode: overlay;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.light-mode {
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            background-blend-mode: multiply;
+        }
+        .container-card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -5px var(--shadow-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+       .action-button {
+            transition: all 0.2s ease-in-out;
+            background-color: var(--module-btn-bg);
+            color: var(--gradient-text-color);
+            font-weight: 700;
+            border-radius: 1rem;
+            box-shadow: 7px 7px 14px var(--neumorphic-shadow-dark), -7px -7px 14px var(--neumorphic-shadow-light);
+            border: none;
+        }
+        .action-button:hover:not(:disabled) {
+            /* box-shadow is now handled in a combined rule */
+        }
+        .action-button:disabled {
+            opacity: 0.6;
+            color: var(--text-color-light);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        body.light-mode .action-button {
+            color: var(--text-color);
+        }
+        .module-button {
+            transition: box-shadow 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            background-color: var(--module-btn-bg);
+            color: var(--text-color-light);
+            border-radius: 1.5rem;
+            width: 8.1rem;
+            height: 8.1rem;
+            box-shadow: 7px 7px 14px var(--neumorphic-shadow-dark), -7px -7px 14px var(--neumorphic-shadow-light);
+            border: none;
+        }
+        .module-button:hover {
+            color: var(--gradient-text-color);
+            /* box-shadow is now handled in a combined rule */
+        }
+
+        .module-button svg {
+            color: #e5e7eb; /* White */
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
+            transition: color 0.2s ease-in-out, filter 0.2s ease-in-out, transform 0.4s ease-in-out;
+        }
+
+        .module-button:hover svg {
+            color: #ffffff; /* Brighter White */
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+            transform: rotate(360deg);
+        }
+
+        body.light-mode .module-button svg {
+            color: inherit;
+            filter: none;
+        }
+
+        body.light-mode .module-button:hover {
+            color: var(--text-color); 
+        }
+        .control-button, .style-button {
+            transition: box-shadow 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            background-color: var(--module-btn-bg);
+            color: var(--text-color-light);
+            border-radius: 0.75rem;
+            box-shadow: 5px 5px 8px var(--neumorphic-shadow-dark), -5px -5px 8px var(--neumorphic-shadow-light);
+            border: none;
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-button:hover, .style-button:hover {
+            color: var(--gradient-text-color);
+            /* box-shadow is now handled in a combined rule */
+        }
+        .control-button.active, .style-button.active {
+            color: var(--gradient-text-color);
+            box-shadow: inset 3px 3px 6px var(--neumorphic-shadow-dark), inset -3px -3px 6px var(--neumorphic-shadow-light);
+        }
+        #back-to-modules {
+            transition: box-shadow 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            background-color: var(--module-btn-bg);
+            color: var(--text-color-light);
+            border-radius: 0.75rem;
+            box-shadow: 5px 5px 8px var(--neumorphic-shadow-dark), -5px -5px 8px var(--neumorphic-shadow-light);
+            border: none;
+        }
+        #back-to-modules:hover {
+            color: var(--gradient-text-color);
+            /* box-shadow is now handled in a combined rule */
+        }
+
+        .module-button:hover,
+        .control-button:hover,
+        .style-button:hover,
+        .action-button:hover:not(:disabled),
+        #back-to-modules:hover {
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 16px var(--neumorphic-shadow-dark), -8px -8px 16px var(--neumorphic-shadow-light);
+        }
+
+        body.light-mode .module-button:hover,
+        body.light-mode .control-button:hover,
+        body.light-mode .style-button:hover,
+        body.light-mode .action-button:hover:not(:disabled),
+        body.light-mode #back-to-modules:hover {
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 16px var(--neumorphic-shadow-dark), -8px -8px 16px rgba(255, 255, 255, 0.7);
+        }
+
+        .gradient-text-brand {
+            background-image: linear-gradient(to right, #ffaf7b, #ff4d4d);
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .gradient-text { color: var(--gradient-text-color); }
+        .upload-zone { transition: all 0.2s ease-in-out; border-radius: 0.75rem;}
+        .upload-zone:hover {
+            border-color: var(--upload-hover-border);
+            background-color: var(--upload-hover-bg);
+        }
+        
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 38px;
+            width: 130px;
+            position: relative;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--module-btn-bg);
+            box-shadow: inset 3px 3px 6px var(--neumorphic-shadow-dark), inset -3px -3px 6px var(--neumorphic-shadow-light);
+            transition: .4s;
+            border-radius: 38px;
+        }
+        body.light-mode .slider {
+            box-shadow: inset 3px 3px 6px rgba(101, 77, 56, 0.8), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 30px;
+            width: 30px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--theme-thumb-color);
+            box-shadow: none;
+            transition: .4s;
+            border-radius: 50%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: normal;
+            font-size: 1rem;
+            color: transparent;
+        }
+        body.light-mode .slider:before {
+            color: #4A443D;
+        }
+        body .slider:before {
+            color: #212121;
+        }
+        input:checked + .slider:before {
+            transform: translateX(92px);
+            content: "";
+        }
+        .separator-line {
+            background-color: var(--separator-color);
+        }
+        
+        .separator-hr {
+            border: none;
+            height: 1px;
+            background-color: var(--separator-color);
+        }
+
+        @keyframes countdown-circle {
+            from { stroke-dashoffset: 0; }
+            to { stroke-dashoffset: 327; } /* 2 * PI * 52 */
+        }
+        
+        #splash-screen.fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+
+        body.light-mode textarea,
+        body.light-mode select {
+            background-color: #FDFBF5; /* A very light cream that fits the theme */
+            border-color: var(--module-btn-border);
+            color: var(--text-color);
+        }
+        body.light-mode textarea::placeholder {
+            color: var(--text-color-light);
+            opacity: 0.8;
+        }
+        body.light-mode #no-color-btn {
+            background-color: var(--module-btn-bg);
+            color: var(--text-color);
+        }
+        body.light-mode #no-color-btn:hover {
+             background-color: #d1c6a8;
+        }
+        body.light-mode #color-palette-dialog .container-card {
+            background-color: var(--module-btn-bg); /* Use button color for a darker feel */
+            backdrop-filter: none; /* Disable blur to make it solid */
+            -webkit-backdrop-filter: none;
+        }
+        body.light-mode #loading-overlay {
+            color: var(--text-color); /* Make loading text dark in light mode */
+        }
+        body.light-mode .separator-line {
+            width: 2px;
+        }
+        body.light-mode .separator-hr {
+            height: 2px;
+        }
+    </style>
+</head>
+<body class="p-0 sm:p-0 lg:p-0 font-sans">
+    
+    <div id="main-app-container" class="hidden p-4 sm:p-6 lg:p-8 flex flex-col min-h-screen">
+        <div class="w-full flex-grow">
+            
+            <header class="grid grid-cols-12 gap-x-4 md:gap-x-8 items-center mb-12 h-16">
+                <div class="col-start-1 lg:col-start-2 col-span-5">
+                    <div id="main-logo-container">
+                        <h1 class="text-2xl font-bold gradient-text-brand">LimeArch Ai</h1>
+                        <p class="text-sm text-gray-400">Mimari Render Asistanı</p>
+                    </div>
+                    <button id="back-to-modules" onclick="showModuleSelection()" class="hidden flex items-center space-x-2 text-sm font-semibold p-3">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        <span>Geri</span>
+                    </button>
+                </div>
+                <div id="theme-container-top" class="col-end-13 lg:col-end-12 col-span-5 flex justify-end items-center">
+                    <div class="flex items-center">
+                        <label class="theme-switch">
+                            <input type="checkbox" id="theme-toggle" onchange="toggleTheme(event)">
+                            <span class="slider">
+                                <div class="absolute inset-0 flex items-center justify-between px-9 z-10">
+                                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                                    <svg class="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM4.343 4.343a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zm1.414 11.314a1 1 0 10-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1z"></path></svg>
+                                </div>
+                            </span>
+                        </label>
+                        <span class="font-bold ml-4">Tema</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="app-content">
+                
+                <div id="module-selection-container" class="w-full">
+                    <div class="flex flex-col items-center gap-8 max-w-5xl mx-auto">
+                        <!-- Top row -->
+                        <div class="flex justify-center w-full px-4 gap-8">
+                            <button id="module-concept-engine" onclick="switchModule('concept-engine')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3v2"></path>
+                                    <line stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" x1="12" y1="18" x2="12.01" y2="18"></line>
+                                    <path stroke="#EA4335" d="M12 2 A10 10 0 0 1 22 12"/>
+                                    <path stroke="#FBBC05" d="M22 12 A10 10 0 0 1 12 22"/>
+                                    <path stroke="#34A853" d="M12 22 A10 10 0 0 1 2 12"/>
+                                    <path stroke="#4285F4" d="M2 12 A10 10 0 0 1 12 2"/>
+                                </svg>
+                                <span class="text-sm font-semibold text-center">Konsept Üret (Render)</span>
+                            </button>
+                            <button id="module-concept-engine-prompt" onclick="switchModule('concept-engine-prompt')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <g transform="scale(0.7) translate(6.64, 7.64)">
+                                        <polygon stroke="currentColor" points="14 2 18 6 7 17 3 17 3 13 14 2"/>
+                                    </g>
+                                    <path stroke="#EA4335" d="M12 2 A10 10 0 0 1 22 12"/>
+                                    <path stroke="#FBBC05" d="M22 12 A10 10 0 0 1 12 22"/>
+                                    <path stroke="#34A853" d="M12 22 A10 10 0 0 1 2 12"/>
+                                    <path stroke="#4285F4" d="M2 12 A10 10 0 0 1 12 2"/>
+                                </svg>
+                                <span class="text-sm font-semibold text-center">Konsept Üret (Prompt)</span>
+                            </button>
+                        </div>
+        
+                        <!-- Horizontal separator -->
+                        <hr class="w-full max-w-2xl separator-hr" />
+        
+                        <!-- Middle row -->
+                        <div class="flex justify-center items-center flex-wrap gap-8">
+                           <button id="module-time-conversion" onclick="switchModule('time-conversion')" class="module-button flex flex-col items-center justify-center p-4">
+                               <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                               <span class="text-sm font-semibold text-center">Zaman Değiştirme</span>
+                           </button>
+                           <button id="module-weather-transition" onclick="switchModule('weather-transition')" class="module-button flex flex-col items-center justify-center p-4">
+                               <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3"/><path d="M5 15A3 3 0 0 1 2 12v0a3 3 0 0 1 3-3"/></svg>
+                               <span class="text-sm font-semibold text-center">Hava Durumu Değiştirme</span>
+                           </button>
+                           <button id="module-facade-generation" onclick="switchModule('facade-generation')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/><path d="M19 10c-1.66-1-1.66-3 0-4"/></svg>
+                                <span class="text-sm font-semibold text-center">Farklı Cephe Görünümleri</span>
+                            </button>
+                           <button id="module-isometric-generation" onclick="switchModule('isometric-generation')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                <span class="text-sm font-semibold text-center">3D İzometrik Oluştur</span>
+                            </button>
+                           <button id="module-material-list" onclick="switchModule('material-list')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                                <span class="text-sm font-semibold text-center">Malzeme Listele</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Horizontal separator -->
+                        <hr class="w-full max-w-2xl separator-hr" />
+
+                        <!-- Bottom row -->
+                        <div class="flex justify-center items-center flex-wrap gap-8">
+                           <button id="module-upscale" onclick="switchModule('upscale')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/><path d="M10 7v6"/><path d="M7 10h6"/></svg>
+                                <span class="text-sm font-semibold text-center">Görüntü İyileştirici</span>
+                            </button>
+                            <button id="module-plan-coloring" onclick="switchModule('plan-coloring')" class="module-button flex flex-col items-center justify-center p-4">
+                                <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l.18.18a9 9 0 0 0 0 12.73L5 23l-2-2 7.27-7.27a9 9 0 0 0-2.54-2.54L2 15V9l5-1 1-5h6l-1 5z"/><path d="M15 13.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+                                <span class="text-sm font-semibold text-center">Plan Renklendir</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="main-header-content" class="hidden">
+                    <div class="container-card p-8 mb-8">
+                        <h1 id="mainTitle" class="text-3xl font-bold text-center mb-2">
+                        </h1>
+                        <p id="mainDescription" class="text-center text-gray-400 max-w-3xl mx-auto">
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Main Control Panel -->
+                <div id="controlPanel" class="hidden container-card p-6 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+                            <div id="main-upload-container">
+                                <label class="block text-sm font-semibold text-gray-400 mb-2 text-center">ANA GÖRSEL</label>
+                                <label id="imageUploadLabel" for="imageUpload" class="upload-zone cursor-pointer flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-700">
+                                    <svg class="w-8 h-8 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" y1="5" x2="22" y2="5"/><line x1="19" y1="2" x2="19" y2="8"/><path d="m10 14-2-2-6 6h16"/></svg>
+                                    <p id="upload-text" class="text-gray-400 text-center text-xs">
+                                        <span class="font-semibold gradient-text">Yüklemek için tıklayın</span>
+                                    </p>
+                                    <p class="text-gray-500 text-center text-xs mt-1">(PDF, JPG, PNG, Webp Uzantıları Destekler)</p>
+                                </label>
+                                <input type="file" id="imageUpload" class="hidden" accept="image/*" multiple onchange="previewImages(event)">
+                                <div id="main-upload-previews" class="hidden flex flex-wrap gap-4"></div>
+                            </div>
+                            <div id="planUploadContainer" class="hidden">
+                                <label class="block text-sm font-semibold text-gray-400 mb-2 text-center">2D MİMARİ PLAN</label>
+                                <label id="planUploadLabel" for="planUpload" class="upload-zone cursor-pointer flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-700">
+                                    <svg class="w-8 h-8 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    <p id="plan-upload-text" class="text-gray-400 text-center text-xs">
+                                        <span class="font-semibold gradient-text">Plan Yükle</span>
+                                    </p>
+                                    <p class="text-gray-500 text-center text-xs mt-1">(PDF, JPG, PNG, Webp Uzantıları Destekler)</p>
+                                </label>
+                                <input type="file" id="planUpload" class="hidden" accept="image/*,application/pdf" onchange="previewPlan(event)">
+                                <div id="plan-upload-previews" class="hidden flex flex-wrap gap-4"></div>
+                           </div>
+                           <div id="styleReferenceContainer" class="hidden">
+                                <label class="block text-sm font-semibold text-gray-400 mb-2 text-center">STİL REFERANSI (İSTEĞE BAĞLI)</label>
+                                <label id="styleReferenceUploadLabel" for="styleReferenceUpload" class="upload-zone cursor-pointer flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-700">
+                                    <svg class="w-8 h-8 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m16 6 4 4-10 10H6v-4L16 6z"/><path d="M20 14c.5-1 .5-2.2.1-3.2s-1-1.8-1.8-2.2c-.8-.4-1.8-.4-2.8 0l-4.4 4.4 6.8 6.8 4.1-4.1z"/></svg>
+                                    <p id="style-upload-text" class="text-gray-400 text-center text-xs">
+                                        <span class="font-semibold gradient-text">Yükleme için Tıklayın</span> veya sürükleyin
+                                    </p>
+                                    <p class="text-gray-500 text-center text-xs mt-1">(PDF, JPG, PNG, Webp Uzantıları Destekler)</p>
+                                </label>
+                                <input type="file" id="styleReferenceUpload" class="hidden" accept="image/*" onchange="previewStyleReference(event)">
+                                <div id="style-upload-previews" class="hidden flex flex-wrap gap-4"></div>
+                           </div>
+                        </div>
+                        <div class="md:col-span-4 flex flex-col items-start gap-4 pt-8">
+                             <div id="colorPickerContainer" class="hidden">
+                                <label class="block text-sm font-semibold text-gray-400 mb-2">RENK TEMASI</label>
+                                <button id="colorPickerButton" class="control-button flex items-center justify-center">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l.18.18a9 9 0 0 0 0 12.73L5 23l-2-2 7.27-7.27a9 9 0 0 0-2.54-2.54L2 15V9l5-1 1-5h6l-1 5z"></path><path d="M15 13.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path></svg>
+                                    <span class="ml-2">Renk Seç</span>
+                                </button>
+                            </div>
+                             <div id="upscaleControlsContainer" class="w-full text-center hidden space-y-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">ORİJİNAL ÇÖZÜNÜRLÜK</label>
+                                    <p id="image-dimensions" class="font-mono text-sm p-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-300">-- x --</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 mb-1">BÜYÜTME FAKTÖRÜ</label>
+                                    <div class="flex space-x-2">
+                                        <button id="upscale-2x" onclick="setUpscaleFactor(2)" class="control-button active py-2 px-3">2x</button>
+                                        <button id="upscale-4x" onclick="setUpscaleFactor(4)" class="control-button py-2 px-3">4x</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="styleSelectorContainer" class="hidden mt-6 w-full md:col-span-12">
+                       <label class="block text-sm font-semibold text-gray-400 mb-3 text-center">Tasarım Stili Seçin</label>
+                       <div class="flex flex-wrap justify-center gap-3 text-xs">
+                       </div>
+                   </div>
+                    <div id="timeSelectorContainer" class="hidden mt-6 w-full">
+                        <label class="block text-sm font-semibold text-gray-400 mb-3 text-center">Zaman Dilimi Seçin</label>
+                        <div class="flex flex-wrap justify-center gap-3 text-xs">
+                            <button onclick="selectTime('Sabah', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FFC300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17V3"/><path d="m12 3-4 4"/><path d="m12 3 4 4"/><path d="M3 11h2"/><path d="M19 11h2"/><path d="M21 17H3"/></svg>
+                                <span>Sabah</span>
+                            </button>
+                            <button onclick="selectTime('Öğle', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                                <span>Öğle</span>
+                            </button>
+                            <button onclick="selectTime('Akşamüstü', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                                <span>Akşamüstü</span>
+                            </button>
+                            <button onclick="selectTime('Günbatımı', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FF4500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17V7"/><path d="m12 7-4 4"/><path d="m12 7 4 4"/><path d="M3 11h2"/><path d="M19 11h2"/><path d="M21 17H3"/></svg>
+                                <span>Günbatımı</span>
+                            </button>
+                            <button onclick="selectTime('Akşam', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#8A2BE2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                                <span>Akşam</span>
+                            </button>
+                            <button onclick="selectTime('Gece', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#4682B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>
+                                <span>Gece</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="weatherSelectorContainer" class="hidden mt-6 w-full">
+                        <label class="block text-sm font-semibold text-gray-400 mb-3 text-center">Hava Durumu Seçin</label>
+                        <div class="flex flex-wrap justify-center gap-3 text-xs">
+                            <button onclick="selectWeather('Güneşli', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                                <span>Güneşli</span>
+                            </button>
+                            <button onclick="selectWeather('Bulutlu', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#A9A9A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                                <span>Bulutlu</span>
+                            </button>
+                            <button onclick="selectWeather('Yağmurlu', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#4682B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a5 5 0 0 0-5-5h-1.26a8 8 0 0 0-15.48 0A5.5 5.5 0 0 0 6.5 22h9.5a5 5 0 0 0 6-5Z"/><path d="M8 22v-2"/><path d="M12 22v-2"/><path d="M16 22v-2"/></svg>
+                                <span>Yağmurlu</span>
+                            </button>
+                            <button onclick="selectWeather('Karlı', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#ADD8E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a5 5 0 0 0-5-5h-1.26a8 8 0 0 0-15.48 0A5.5 5.5 0 0 0 6.5 22h9.5a5 5 0 0 0 6-5Z"/><path d="M8 22l-1-1"/><path d="m12 18 1 1"/><path d="M16 22l-1-1"/><path d="M8 18l1 1"/><path d="m12 22 1-1"/><path d="M16 18l1 1"/></svg>
+                                <span>Karlı</span>
+                            </button>
+                            <button onclick="selectWeather('Sisli', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#B0C4DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="M7 17h10"/><path d="M2 17h2.5"/><path d="M19.5 17H22"/><path d="M7 7h10"/><path d="M2 7h2.5"/><path d="M19.5 7H22"/></svg>
+                                <span>Sisli</span>
+                            </button>
+                            <button onclick="selectWeather('Fırtınalı', this)" class="control-button">
+                                <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="#FF4500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.74 18a4.5 4.5 0 0 0-2.48-3.6c-.2-.12-.41-.24-.62-.35a4.5 4.5 0 0 0-5.78 1.58 7 7 0 0 0-10.36 6.18h14.72a4.5 4.5 0 0 0 4.52-3.81z"/><path d="m9.15 12.55 3.3-7.05a2.1 2.1 0 0 1 3.9 0l3.3 7.05"/><path d="M12.5 22.5 14 20l-2.5-1.5L9 20l1.5 2.5Z"/></svg>
+                                <span>Fırtınalı</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="textPromptContainer" class="hidden mt-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="textPromptInput" class="text-sm font-semibold text-gray-400">Talimatlarınız</label>
+                                <button id="generate-ideas-btn" onclick="generatePromptIdeas()" class="text-xs font-semibold gradient-text hover:underline flex items-center space-x-1">
+                                    <span>✨ Fikir Üret</span>
+                                    <svg id="idea-spinner" class="hidden animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        <textarea id="textPromptInput" rows="2" class="w-full p-2 border border-gray-700 rounded-lg bg-gray-900 text-gray-300 font-medium shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500" placeholder="ör., duvarları tuğla yap ve köşeye bir bitki ekle..."></textarea>
+                        <div id="prompt-ideas-container" class="hidden mt-2 space-y-1"></div>
+                    </div>
+                    <div id="quantitySelectorContainer" class="hidden mt-6 text-center">
+                        <label class="block text-sm font-semibold text-gray-400 mb-2">Üretim Adedi</label>
+                        <div id="quantityButtons" class="flex flex-wrap justify-center gap-2">
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button id="startButton" onclick="startProcess()" class="action-button w-full py-3 px-6 flex items-center justify-center" disabled>
+                            <span id="buttonText">Konsept Üret</span>
+                            <svg id="loadingSpinner" class="hidden animate-spin ml-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="previewSection" class="hidden container-card p-6 mb-8">
+                    <div id="styleReferencePreviewSection" class="hidden">
+                        <h2 class="text-xl font-bold mb-4">Yüklenen Stil Referansı</h2>
+                        <div id="styleReferencePreviewContainer"></div>
+                    </div>
+                </div>
+
+
+                <div id="galleryPanel" class="hidden container-card p-6 h-fit">
+                    <h2 id="galleryTitle" class="text-xl font-bold mb-4">Yeni Render Galerisi</h2>
+                    <div id="imageGallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+                </div>
+
+            </div>
+        </div>
+
+        
+    </div>
+    
+    <!-- Message Box Modal -->
+    <div id="messageBox" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center">
+        <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md container-card">
+            <div class="mt-3 text-center">
+                <h3 id="messageTitle" class="text-lg leading-6 font-medium">Mesaj</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="messageContent" class="text-sm text-gray-400">Error or info content.</p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="messageCloseButton" class="px-4 py-2 bg-emerald-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 modal-lightbox-bg z-[100] flex items-center justify-center p-4">
+        <div class="relative max-w-7xl max-h-[90vh] w-full flex flex-col">
+            <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white text-3xl font-bold opacity-75 hover:opacity-100 transition duration-200 p-2 z-10">&times;</button>
+            <button onclick="navigateLightbox(-1)" class="absolute left-0 top-1/2 -translate-y-1/2 text-white text-4xl font-bold opacity-50 hover:opacity-100 p-4 z-10">&#10094;</button>
+            <button onclick="navigateLightbox(1)" class="absolute right-0 top-1/2 -translate-y-1/2 text-white text-4xl font-bold opacity-50 hover:opacity-100 p-4 z-10">&#10095;</button>
+            <div id="lightboxContent" class="max-w-7xl max-h-[85vh] mx-auto rounded-lg shadow-2xl bg-black flex items-center justify-center">
+                <img-comparison-slider id="lightboxSlider" class="hidden max-w-full max-h-[85vh] object-contain rounded-lg" style="--divider-width: 2px; --divider-color: rgba(255,255,255,0.7); --handle-size: 40px;">
+                    <img slot="first" id="lightboxBeforeImage" src="" alt="Orijinal Görüntü"/>
+                    <img slot="second" id="lightboxAfterImage" src="" alt="Oluşturulan Görüntü"/>
+                </img-comparison-slider>
+                <img id="lightboxImageSingle" class="hidden max-w-full max-h-[85vh] object-contain rounded-lg" src="" alt="Büyütülmüş Görüntü">
+                <video id="lightboxVideo" class="hidden max-w-full max-h-[85vh] object-contain rounded-lg" controls loop autoplay></video>
+            </div>
+            <div class="mt-4 text-center">
+                <button id="lightboxDownloadButton" class="py-3 px-8 bg-green-500 text-white font-bold rounded-xl shadow-md hover:bg-green-600 transition duration-150 focus:outline-none">İndir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Color Palette Modal -->
+    <div id="color-palette-dialog" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+        <div class="container-card p-6 w-full max-w-lg">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Bir Renk Teması Seçin</h3>
+                <button id="color-palette-dialog-close" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div id="color-grid" class="grid grid-cols-8 gap-2">
+                <!-- Colors will be injected here by JS -->
+            </div>
+            <button id="no-color-btn" onclick="clearColorSelection()" class="mt-4 w-full py-2 px-4 rounded-lg text-sm bg-gray-700 hover:bg-gray-600 transition">
+                Renk Teması Yok
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay with Timer -->
+    <div id="loading-overlay" class="hidden fixed inset-0 modal-bg z-[110] flex flex-col items-center justify-center text-white backdrop-blur-sm">
+        <div class="relative w-48 h-48">
+            <svg class="w-full h-full" viewBox="0 0 120 120">
+                <circle class="text-gray-600" stroke-width="8" stroke="currentColor" fill="transparent" r="52" cx="60" cy="60" />
+                <circle id="timer-progress" class="text-emerald-500"
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="52"
+                    cx="60"
+                    cy="60"
+                    style="stroke-dasharray: 327; stroke-dashoffset: 327; transform: rotate(-90deg); transform-origin: 50% 50%;"
+                />
+            </svg>
+            <div id="timer-text" class="absolute inset-0 flex items-center justify-center text-4xl font-bold">
+                0s
+            </div>
+        </div>
+        <p class="mt-4 text-xl font-semibold">İşlem Sürüyor...</p>
+        <button id="cancel-process-btn" onclick="cancelProcess()" class="mt-6 bg-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg hover:bg-red-700 transition">
+            &times;
+        </button>
+    </div>
+
+    <script type="module">
+        // State variables
+        let currentModule = null;
+        const currentLanguage = 'tr';
+        let referenceImages = []; 
+        let planFile = null;
+        let styleReferenceImage = null;
+        let galleryItems = []; 
+        let currentLightboxIndex = -1;  
+        let selectedColor = null;
+        let isProcessing = false;
+        let countdownInterval = null;
+        let isGeneratingIdeas = false;
+        let generationCount = null;
+        let selectedStyle = null; 
+        let upscaleFactor = 2;
+        let selectedTime = null;
+        let selectedWeather = null;
+        let processAbortController = null;
+        
+        const API_KEY = ""; // If you want to use models other than gemini-2.5-flash-preview-05-20 or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        const IMAGE_GEN_MODEL = "gemini-2.5-flash-image-preview";
+        const IMAGE_GEN_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GEN_MODEL}:generateContent?key=${API_KEY}`;
+        
+        const moduleMappings = {
+            'concept-engine': { title: 'conceptEngineTitle', desc: 'conceptEngineDesc', btn: 'generateConcepts', quantities: [1, 2, 5, 10], style: true },
+            'concept-engine-prompt': { title: 'conceptEnginePromptTitle', desc: 'conceptEnginePromptDesc', btn: 'generateConceptPrompt', quantities: [], text: true, style: true },
+            'time-conversion': { title: 'timeConversionTitle', desc: 'timeConversionDesc', btn: 'changeTime', quantities: [] },
+            'weather-transition': { title: 'weatherTransitionTitle', desc: 'weatherTransitionDesc', btn: 'changeWeather', quantities: [], text: true },
+            'isometric-generation': { title: 'isometricGenerationTitle', desc: 'isometricGenerationDesc', btn: 'generateIsometric', quantities: [1, 2, 5] },
+            'facade-generation': { title: 'facadeGenerationTitle', desc: 'facadeGenerationDesc', btn: 'generateFacades', quantities: [1, 2, 5, 10] },
+            'material-list': { title: 'materialListTitle', desc: 'materialListDesc', btn: 'generateMaterialList', quantities: [] },
+            'upscale': { title: 'imageEnhancerTitle', desc: 'imageEnhancerDesc', btn: 'upscaleButton', quantities: [], upscale: true },
+            'plan-coloring': { title: 'planColoringTitle', desc: 'planColoringDesc', btn: 'colorizePlan', quantities: [], pdf: true, color: true },
+        };
+
+        const translations = {
+            tr: {
+                // Sidebar
+                timeConversion: "Zaman Değiştirme",
+                weatherTransition: "Hava Durumu Değiştirme",
+                imageEnhancer: "Görüntü İyileştirici",
+                masterplanRendering: "Plan Renklendir",
+
+                // Module Titles & Descriptions
+                materialListTitle: "Malzeme Listele",
+                materialListDesc: "Yüklenen görselin üzerinde kullanılan malzemelerin taranarak bir malzeme listesi ve görsel paftası oluşturulmasını sağlayın.",
+                generateMaterialList: "Malzeme Paftası Oluştur",
+                isometricGenerationTitle: "3D İzometrik Oluştur",
+                isometricGenerationDesc: "Bir 2D plan çizimini, tek cepheli görseli, görünüşü veya eskizi, 3D render edilmiş izometrik bir projeye çevirin. Peyzaj, aydınlatma, insanlar ve araçlar gibi unsurlar kaynak görselde varsa, projeye uyumlu ölçekte eklenir.",
+                generateIsometric: "İzometrik Oluştur",
+                facadeGenerationTitle: "Farklı Cephe Görünümleri",
+                facadeGenerationDesc: "Tek bir dış cephe görseli yükleyerek, yapay zekanın aynı tasarımın farklı açılardan görünümlerini oluşturmasını sağlayın.",
+                generateFacades: "Yeni Görünüm Üret",
+                timeConversionTitle: "Zaman Değiştirme",
+                timeConversionDesc: "Tek bir tıklama ile render'larınızın günün saatini ve aydınlatmasını değiştirin.",
+                changeTime: "Zamanı Değiştir",
+                weatherTransitionTitle: "Hava Durumu Değiştirme",
+                weatherTransitionDesc: "Render'larınızın atmosferini yağmurlu, karlı, sisli gibi farklı hava koşullarına dönüştürün.",
+                changeWeather: "Hava Durumunu Değiştir",
+                imageEnhancerTitle: "Görüntü İyileştirici",
+                imageEnhancerDesc: "Görsel netliğini ve ayrıntısını ultra yüksek çözünürlüğe çıkarmak için geliştirin.",
+                upscaleButton: "Kaliteyi Artır",
+                planColoringTitle: "Plan Renklendir",
+                planColoringDesc: "Binaları, yolları, yeşillikleri ve döşemeleri akıllıca algılayarak vaziyet planı çizimlerini tam renkli render'lara dönüştürün.",
+                colorizePlan: "Planı Renklendir",
+
+                // Other translations
+                appSubtitle: "Mimari Render Asistanı",
+                themeToggle: "Tema",
+                conceptHeader: "KONSEPT",
+                conceptEngine: "Konsept Üret",
+                conceptEnginePrompt: "Konsept Üret (Prompt)",
+                mainImageLabel: "ANA GÖRSEL(LER)",
+                styleReferenceLabel: "STİL REFERANSI (İSTEĞE BAĞLI)",
+                uploadText: `<span class="font-semibold gradient-text">Yüklemek için tıklayın</span> veya sürükleyin`,
+                uploadTextPdf: `<span class="font-semibold gradient-text">PDF / Jpg / Png Dosyasını Yükle</span>`,
+                uploadStyleRefText: `<span class="font-semibold gradient-text">Yüklemek için tıklayın</span> veya sürükleyin`,
+                uploadedVisualsTitle: "Yüklenen Ana Görsel(ler)",
+                uploadedStyleRefTitle: "Yüklenen Stil Referansı",
+                messageBoxTitle: "Mesaj",
+                messageBoxClose: "Kapat",
+                downloadButton: "İndir",
+                textPromptLabel: "Talimatlarınız",
+                textPromptPlaceholder: "ör., duvarları tuğla yap ve köşeye bir bitki ekle...",
+                errorTextPrompt: "Devam etmek için lütfen metin kutusuna talimatları girin.",
+                generateIdeas: "Fikir Üret",
+                quantityLabel: "Üretim Adedi",
+                conceptEngineTitle: "Konsept Üret",
+                conceptEngineDesc: "Orijinal geometriyi korurken yeni malzemelerle <b>farklı tasarım konseptleri</b> oluşturmak için <b>tek bir görsel (eskiz, 3B görünüm vb.)</b> yükleyin.",
+                conceptEnginePromptTitle: "Konsept Üret (Prompt)",
+                conceptEnginePromptDesc: "Görselinizin belirli bölümlerini <b>metin komutları kullanarak düzenlemek ve iyileştirmek</b> için bir görsel yükleyin.",
+                generateConceptPrompt: "Konsepti Üret",
+                generateConcepts: "Konsept Üret",
+                imagesSelected: (count) => `${count} resim seçildi.`,
+                styleRefSelected: `Referans seçildi.`,
+                errorMsg: "Hata",
+                errorUpload: "Lütfen en az bir ana görsel yükleyin.",
+                analyzing: "Analiz ediliyor...",
+                generating: (current, total) => `Oluşturuluyor (${current}/${total})...`,
+                successMsg: "Başarılı",
+                successRender: (total) => `${total} yeni sonuç başarıyla oluşturuldu!`,
+                errorOccurred: "Bir Hata Oluştu",
+                errorProcess: (message) => `İşlem sırasında bir sorunla karşılaşıldı: ${message}`,
+                galleryTitle: (module, total) => `${module} Galerisi (${total} Sonuç)`,
+                renderError: (index) => `Hata: Sonuç ${index} oluşturulamadı.`,
+                renderGenerating: (index) => `Sonuç #${index} oluşturuluyor...`,
+                inProgressTitle: "İşlem Devam Ediyor",
+                inProgressMessage: "İşleminiz Devam Ediyor. Lütfen Bekleyiniz.",
+                noIdeas: "Bu görsel için yeni fikirler üretilemedi."
+            }
+        };
+        const architecturalStyles = [
+            { key: 'Biomorphic Architecture', name: 'Biyomorfik Mimari' },
+            { key: 'Gothic Architecture', name: 'Gotik Mimari' },
+            { key: 'Neoclassical Architecture', name: 'Neoklasik Mimari' },
+            { key: 'High-tech Architecture', name: 'Yüksek Teknoloji' },
+            { key: 'Eastern Architecture', name: 'Doğu Mimarisi' },
+            { key: 'Tudor Architecture', name: 'Tudor Mimarisi' },
+            { key: 'Islamic Architecture', name: 'İslami Mimari' },
+            { key: 'Streamlined Architecture', name: 'Akıcı Mimari' }
+        ];
+
+        // DOM Elements
+        const mainHeaderContent = document.getElementById('main-header-content');
+        const mainTitle = document.getElementById('mainTitle');
+        const mainDescription = document.getElementById('mainDescription');
+        const imageUpload = document.getElementById('imageUpload');
+        const imageUploadLabel = document.getElementById('imageUploadLabel');
+        const mainUploadContainer = document.getElementById('main-upload-container');
+        const mainUploadPreviews = document.getElementById('main-upload-previews');
+        const uploadText = document.getElementById('upload-text');
+        const planUploadContainer = document.getElementById('planUploadContainer');
+        const planUpload = document.getElementById('planUpload');
+        const planUploadLabel = document.getElementById('planUploadLabel');
+        const planUploadPreviews = document.getElementById('plan-upload-previews');
+        const styleReferenceContainer = document.getElementById('styleReferenceContainer');
+        const styleReferenceUploadLabel = document.getElementById('styleReferenceUploadLabel');
+        const styleUploadPreviews = document.getElementById('style-upload-previews');
+        const styleUploadText = document.getElementById('style-upload-text');
+        const startButton = document.getElementById('startButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const previewSection = document.getElementById('previewSection');
+        const imageGallery = document.getElementById('imageGallery');
+        const galleryPanel = document.getElementById('galleryPanel');
+        const galleryTitle = document.getElementById('galleryTitle');
+        const textPromptContainer = document.getElementById('textPromptContainer');
+        const quantitySelectorContainer = document.getElementById('quantitySelectorContainer');
+        const quantityButtons = document.getElementById('quantityButtons');
+        const styleSelectorContainer = document.getElementById('styleSelectorContainer');
+        const timeSelectorContainer = document.getElementById('timeSelectorContainer');
+        const weatherSelectorContainer = document.getElementById('weatherSelectorContainer');
+        const messageBox = document.getElementById('messageBox');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageContent = document.getElementById('messageContent');
+        const messageCloseButton = document.getElementById('messageCloseButton');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxVideo = document.getElementById('lightboxVideo');
+        const lightboxDownloadButton = document.getElementById('lightboxDownloadButton');
+        const upscaleControlsContainer = document.getElementById('upscaleControlsContainer');
+        const colorPickerContainer = document.getElementById('colorPickerContainer');
+        const lightboxSlider = document.getElementById('lightboxSlider');
+        const lightboxBeforeImage = document.getElementById('lightboxBeforeImage');
+        const lightboxAfterImage = document.getElementById('lightboxAfterImage');
+        const lightboxImageSingle = document.getElementById('lightboxImageSingle');
+        const moduleSelectionContainer = document.getElementById('module-selection-container');
+        const controlPanel = document.getElementById('controlPanel');
+        const backToModulesBtn = document.getElementById('back-to-modules');
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // --- Core Functions exposed to window for HTML onclick handlers ---
+        
+        window.cancelProcess = () => {
+            if (processAbortController) {
+                processAbortController.abort();
+            }
+
+            const cancelBtn = document.getElementById('cancel-process-btn');
+            const loadingText = document.querySelector('#loading-overlay p');
+            const timerText = document.getElementById('timer-text');
+            const progressCircle = document.getElementById('timer-progress');
+            
+            cancelBtn.disabled = true;
+            loadingText.textContent = "İşlem İptal Ediliyor...";
+            
+            // Stop the main timer and animation
+            clearInterval(countdownInterval);
+            
+            // Change color to red and restart animation for 8 seconds
+            progressCircle.classList.remove('text-emerald-500');
+            progressCircle.classList.add('text-red-500');
+            progressCircle.style.animation = 'none';
+            void progressCircle.offsetWidth; // Trigger reflow
+            progressCircle.style.animation = `countdown-circle 8s linear forwards`;
+
+            let cancelCountdown = 8;
+            timerText.textContent = `${cancelCountdown}s`;
+
+            const cancelInterval = setInterval(() => {
+                cancelCountdown--;
+                timerText.textContent = `${cancelCountdown}s`;
+                if (cancelCountdown <= 0) {
+                    clearInterval(cancelInterval);
+                    
+                    // Reset UI after countdown
+                    isProcessing = false;
+                    hideLoadingOverlay();
+                    startButton.disabled = referenceImages.length === 0;
+                    galleryPanel.classList.add('hidden');
+                    imageGallery.innerHTML = '';
+                    galleryItems = [];
+                    updateStartButtonText();
+                    showMessage("İşlem İptal Edildi", "Yeni görsel oluşturma işlemi tarafınızca iptal edildi.");
+                }
+            }, 1000);
+        };
+
+        window.setGenerationCount = (count) => {
+            generationCount = count;
+            document.querySelectorAll('#quantityButtons button').forEach(btn => {
+                const isActive = parseInt(btn.dataset.count) === count;
+                btn.classList.toggle('active', isActive);
+                if (isActive) {
+                    addCheckmark(btn);
+                } else {
+                    removeCheckmark(btn);
+                }
+            });
+            updateStartButtonText();
+        };
+        window.selectStyle = (styleKey, element) => {
+            if (selectedStyle === styleKey) {
+                selectedStyle = null;
+                element.classList.remove('active');
+                removeCheckmark(element);
+            } else {
+                selectedStyle = styleKey;
+                document.querySelectorAll('.style-button').forEach(btn => {
+                    btn.classList.remove('active');
+                    removeCheckmark(btn);
+                });
+                element.classList.add('active');
+                addCheckmark(element);
+            }
+        };
+        window.selectTime = (time, element) => {
+            if (selectedTime === time) {
+                selectedTime = null;
+                element.classList.remove('active');
+                removeCheckmark(element);
+            } else {
+                selectedTime = time;
+                document.querySelectorAll('#timeSelectorContainer button').forEach(btn => {
+                    btn.classList.remove('active');
+                    removeCheckmark(btn);
+                });
+                element.classList.add('active');
+                addCheckmark(element);
+            }
+        };
+        window.selectWeather = (weather, element) => {
+            if (selectedWeather === weather) {
+                selectedWeather = null;
+                element.classList.remove('active');
+                removeCheckmark(element);
+            } else {
+                selectedWeather = weather;
+                document.querySelectorAll('#weatherSelectorContainer button').forEach(btn => {
+                    btn.classList.remove('active');
+                    removeCheckmark(btn);
+                });
+                element.classList.add('active');
+                addCheckmark(element);
+            }
+        };
+        window.setUpscaleFactor = (factor) => {
+            upscaleFactor = factor;
+            const btn2x = document.getElementById('upscale-2x');
+            const btn4x = document.getElementById('upscale-4x');
+
+            btn2x.classList.toggle('active', factor === 2);
+            btn4x.classList.toggle('active', factor === 4);
+            
+            removeCheckmark(btn2x);
+            removeCheckmark(btn4x);
+
+            if (factor === 2) {
+                addCheckmark(btn2x);
+            } else {
+                addCheckmark(btn4x);
+            }
+        };
+        
+        window.showModuleSelection = () => {
+            if (controlPanel) controlPanel.classList.add('hidden');
+            if (mainHeaderContent) mainHeaderContent.classList.add('hidden');
+            if (previewSection) previewSection.classList.add('hidden');
+            if (galleryPanel) galleryPanel.classList.add('hidden');
+            if (backToModulesBtn) backToModulesBtn.classList.add('hidden');
+            
+            if (moduleSelectionContainer) moduleSelectionContainer.classList.remove('hidden');
+            
+            // MODÜL SEÇİMİNDE BAŞLIĞI GÖSTER
+            const mainLogoContainer = document.getElementById('main-logo-container');
+            if (mainLogoContainer) mainLogoContainer.classList.remove('hidden');
+
+            resetUIState();
+            currentModule = null;
+        };
+
+        window.switchModule = (moduleName) => {
+            if (isProcessing) {
+                showMessage(translations[currentLanguage].inProgressTitle, translations[currentLanguage].inProgressMessage);
+                return;
+            }
+            
+            if (moduleSelectionContainer) moduleSelectionContainer.classList.add('hidden');
+            if (mainHeaderContent) mainHeaderContent.classList.remove('hidden');
+            if (controlPanel) controlPanel.classList.remove('hidden');
+            if (backToModulesBtn) backToModulesBtn.classList.remove('hidden');
+
+            // MODÜL AÇILDIĞINDA BAŞLIĞI GİZLE
+            const mainLogoContainer = document.getElementById('main-logo-container');
+            if (mainLogoContainer) mainLogoContainer.classList.add('hidden');
+
+            currentModule = moduleName;
+            resetUIState();
+            
+            const lang = currentLanguage;
+            if (textPromptContainer) textPromptContainer.classList.add('hidden');
+            if (styleReferenceContainer) styleReferenceContainer.classList.add('hidden');
+            if (quantitySelectorContainer) quantitySelectorContainer.classList.add('hidden');
+            if (styleSelectorContainer) styleSelectorContainer.classList.add('hidden');
+            if (timeSelectorContainer) timeSelectorContainer.classList.add('hidden');
+            if (weatherSelectorContainer) weatherSelectorContainer.classList.add('hidden');
+            if (quantityButtons) quantityButtons.innerHTML = '';
+            if (upscaleControlsContainer) upscaleControlsContainer.classList.add('hidden');
+            if (colorPickerContainer) colorPickerContainer.classList.add('hidden');
+            if (planUploadContainer) planUploadContainer.classList.add('hidden');
+            if (mainUploadContainer) mainUploadContainer.classList.remove('hidden');
+
+
+            if (imageUpload) imageUpload.accept = 'image/*';
+            if (uploadText) uploadText.innerHTML = translations[lang].uploadText;
+            
+            const config = moduleMappings[moduleName];
+            if(config) {
+                if (mainTitle) mainTitle.innerHTML = translations[lang][config.title];
+                if (mainDescription) mainDescription.innerHTML = translations[lang][config.desc];
+                if (imageUpload) imageUpload.multiple = (moduleName !== 'concept-engine-prompt' && moduleName !== 'time-conversion' && moduleName !== 'weather-transition' && moduleName !== 'upscale' && moduleName !== 'plan-coloring' && moduleName !== 'facade-generation' && moduleName !== 'isometric-generation' && moduleName !== 'material-list');
+
+
+                if(config.text && textPromptContainer) textPromptContainer.classList.remove('hidden');
+                if(config.style && styleReferenceContainer) styleReferenceContainer.classList.remove('hidden');
+                if(config.upscale && upscaleControlsContainer) upscaleControlsContainer.classList.remove('hidden');
+                if(config.color && colorPickerContainer) colorPickerContainer.classList.remove('hidden');
+                if(config.pdf) {
+                    if (imageUpload) imageUpload.accept = 'application/pdf,image/*';
+                    if (uploadText) uploadText.innerHTML = translations[lang].uploadTextPdf;
+                }
+
+                if (moduleName === 'time-conversion' && timeSelectorContainer) {
+                    timeSelectorContainer.classList.remove('hidden');
+                }
+                if (moduleName === 'weather-transition' && weatherSelectorContainer) {
+                    weatherSelectorContainer.classList.remove('hidden');
+                }
+                 if (moduleName === 'isometric-generation' && planUploadContainer) {
+                    planUploadContainer.classList.remove('hidden');
+                }
+
+                if (config.quantities && config.quantities.length > 0 && quantitySelectorContainer && quantityButtons) {
+                    quantitySelectorContainer.classList.remove('hidden');
+                    config.quantities.forEach(q => {
+                        const btn = document.createElement('button');
+                        btn.className = 'control-button py-2 px-3 text-xs';
+                        btn.textContent = `${q} Adet`;
+                        btn.dataset.count = q;
+                        btn.onclick = () => window.setGenerationCount(q);
+                        quantityButtons.appendChild(btn);
+                    });
+                    generationCount = null; // Set to null by default
+                } else {
+                    generationCount = 1;
+                }
+
+                if ((moduleName === 'concept-engine' || moduleName === 'concept-engine-prompt') && styleSelectorContainer) {
+                    styleSelectorContainer.classList.remove('hidden');
+                }
+
+                updateStartButtonText();
+            }
+        };
+
+        window.previewImages = (event) => {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            const isMultiUploadAllowed = imageUpload.multiple;
+            if(!isMultiUploadAllowed && files.length > 0){
+                referenceImages = []; // Clear previous if only one is allowed
+            }
+            
+            startButton.disabled = true;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                if (file.type.startsWith('image/')) {
+                    reader.onload = (readerEvent) => {
+                        resizeAndGetBase64(file, (base64Data, resizedDataUrl) => {
+                            if (!isMultiUploadAllowed) {
+                                referenceImages = [{ id: crypto.randomUUID(), base64: base64Data, dataUrl: resizedDataUrl, isPdf: false }];
+                            } else {
+                                referenceImages.push({ id: crypto.randomUUID(), base64: base64Data, dataUrl: resizedDataUrl, isPdf: false });
+                            }
+                            renderPreviews();
+                            if(planUploadContainer && planUploadContainer.style.display !== 'none' && planUploadLabel){
+                                planUploadLabel.style.opacity = '0.5';
+                                planUploadLabel.style.pointerEvents = 'none';
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(file);
+
+                } else if (file.type === 'application/pdf') {
+                    reader.onload = async (event) => {
+                        try {
+                            const pdfData = new Uint8Array(event.target.result);
+                            const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                            const pdf = await loadingTask.promise;
+                            const page = await pdf.getPage(1);
+                            const viewport = page.getViewport({ scale: 2.0 });
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+
+                            await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                            const base64Data = imageDataUrl.split(',')[1];
+                            
+                            referenceImages = [{ id: crypto.randomUUID(), base64: base64Data, dataUrl: imageDataUrl, isPdf: true }];
+                            renderPreviews();
+
+                        } catch (error) {
+                            console.error('Error processing PDF:', error);
+                            showMessage(translations[currentLanguage].errorPdfTitle, translations[currentLanguage].errorPdfContent);
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+            if (imageUpload) imageUpload.value = '';
+        };
+
+        window.previewPlan = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (startButton) startButton.disabled = true;
+
+            const reader = new FileReader();
+             if (file.type.startsWith('image/')) {
+                reader.onload = (readerEvent) => {
+                    resizeAndGetBase64(file, (base64Data, resizedDataUrl) => {
+                        planFile = { id: 'plan-file', base64: base64Data, dataUrl: resizedDataUrl, isPdf: false };
+                        renderPreviews();
+                        if (imageUploadLabel) {
+                            imageUploadLabel.style.opacity = '0.5';
+                            imageUploadLabel.style.pointerEvents = 'none';
+                        }
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                reader.onload = async (event) => {
+                    try {
+                        const pdfData = new Uint8Array(event.target.result);
+                        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                        const pdf = await loadingTask.promise;
+                        const page = await pdf.getPage(1);
+                        const viewport = page.getViewport({ scale: 2.0 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                        const base64Data = imageDataUrl.split(',')[1];
+                        planFile = { id: 'plan-file', base64: base64Data, dataUrl: imageDataUrl, isPdf: true };
+                        renderPreviews();
+                        if (imageUploadLabel) {
+                            imageUploadLabel.style.opacity = '0.5';
+                            imageUploadLabel.style.pointerEvents = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Error processing PDF:', error);
+                        showMessage('Hata', 'PDF dosyası işlenirken bir sorun oluştu.');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            if (planUpload) planUpload.value = '';
+        };
+
+        window.previewStyleReference = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (readerEvent) => {
+                    resizeAndGetBase64(file, (base64Data, resizedDataUrl) => {
+                        styleReferenceImage = { id: 'style-ref', base64: base64Data, dataUrl: resizedDataUrl };
+                        renderPreviews(); 
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+            const styleReferenceUpload = document.getElementById('styleReferenceUpload');
+            if (styleReferenceUpload) styleReferenceUpload.value = '';
+        };
+
+        window.removeImage = (id) => {
+            referenceImages = referenceImages.filter(img => img.id !== id);
+            renderPreviews();
+            if (referenceImages.length === 0) {
+                if (planUploadLabel) {
+                    planUploadLabel.style.opacity = '1';
+                    planUploadLabel.style.pointerEvents = 'auto';
+                }
+            }
+        };
+
+        window.removePlan = () => {
+            planFile = null;
+            renderPreviews();
+            if (imageUploadLabel) {
+                imageUploadLabel.style.opacity = '1';
+                imageUploadLabel.style.pointerEvents = 'auto';
+            }
+        };
+        
+        window.removeStyleReference = () => {
+            styleReferenceImage = null;
+            renderPreviews();
+        };
+        
+        window.generatePromptIdeas = async () => {
+            if (referenceImages.length === 0) {
+                showMessage('Hata', 'Lütfen önce bir ana görsel yükleyin.');
+                return;
+            }
+            if (isGeneratingIdeas) return;
+
+            isGeneratingIdeas = true;
+            const ideaSpinner = document.getElementById('idea-spinner');
+            const ideasContainer = document.getElementById('prompt-ideas-container');
+            
+            if (ideaSpinner) ideaSpinner.classList.remove('hidden');
+            if (ideasContainer) {
+                ideasContainer.innerHTML = '';
+                ideasContainer.classList.add('hidden');
+            }
+
+            try {
+                let systemPrompt;
+                if (currentModule === 'concept-engine-prompt') {
+                    systemPrompt = `You are an expert interior/exterior designer. Look at the provided image. Generate 5 short, creative, and inspiring text prompts in Turkish for editing this image. The prompts should suggest changes in materials, lighting, adding objects, or altering the mood. For example: 'rahat bir şömine ekle', 'duvarları koyu ahşap panelle değiştir', 'yağmurlu bir gece sahnesine dönüştür'.`;
+                } else {
+                    return; 
+                }
+
+                const ideas = await callPromptGeneratorAPI(systemPrompt, 5); 
+                
+                if (ideas && ideas.length > 0) {
+                    ideas.forEach(idea => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full text-left text-sm p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition';
+                        btn.textContent = idea.prompt;
+                        btn.onclick = () => {
+                            const textPromptInput = document.getElementById('textPromptInput');
+                            if (textPromptInput) textPromptInput.value = idea.prompt;
+                            if (ideasContainer) ideasContainer.classList.add('hidden');
+                        };
+                        if (ideasContainer) ideasContainer.appendChild(btn);
+                    });
+                    if (ideasContainer) ideasContainer.classList.remove('hidden');
+                } else {
+                    showMessage('Fikir Bulunamadı', translations[currentLanguage].noIdeas);
+                }
+            } catch (error) {
+                console.error("Error generating prompt ideas:", error);
+                showMessage('Hata', 'Fikir üretilirken bir sorun oluştu.');
+            } finally {
+                isGeneratingIdeas = false;
+                if (ideaSpinner) ideaSpinner.classList.add('hidden');
+            }
+        }
+
+        window.startProcess = async () => {
+            if (referenceImages.length === 0 && !planFile) {
+                showMessage(translations[currentLanguage].errorMsg, translations[currentLanguage].errorUpload);
+                return;
+            }
+
+            const config = moduleMappings[currentModule];
+            if (config && config.quantities && config.quantities.length > 0 && generationCount === null) {
+                 showMessage(translations.tr.errorMsg, "Lütfen bir üretim adedi seçin.");
+                 return;
+            }
+
+             if (currentModule === 'concept-engine-prompt') {
+                const userEditPrompt = document.getElementById('textPromptInput')?.value;
+                if (!userEditPrompt && !selectedStyle) { // Also check for selectedStyle in prompt mode
+                    showMessage(translations[currentLanguage].errorMsg, "Lütfen bir talimat girin veya bir stil seçin.");
+                    return; 
+                }
+            }
+             if (currentModule === 'time-conversion' && !selectedTime) {
+                showMessage(translations.tr.errorMsg, "Lütfen bir zaman dilimi seçin.");
+                return;
+            }
+            if (currentModule === 'weather-transition') {
+                const userEditPrompt = document.getElementById('textPromptInput')?.value;
+                if (!selectedWeather && !userEditPrompt?.trim()) {
+                    showMessage(translations.tr.errorMsg, "Lütfen bir hava durumu seçin veya bir talimat girin.");
+                    return;
+                }
+            }
+            
+            processAbortController = new AbortController();
+            isProcessing = true;
+            if (startButton) startButton.disabled = true;
+            if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+            if (galleryPanel) galleryPanel.classList.add('hidden');
+            if (imageGallery) imageGallery.innerHTML = '';
+            galleryItems = [];
+            const originalButtonText = buttonText?.textContent;
+            
+            showLoadingOverlay(25);
+
+            try {
+                await processStaticImages(processAbortController.signal);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Process was cancelled by the user.');
+                    return; 
+                }
+                console.error("Main Process Error:", error);
+                showMessage(translations[currentLanguage].errorOccurred, translations[currentLanguage].errorProcess(error.message));
+                const placeholder = document.querySelector('.animate-pulse');
+                if (placeholder) {
+                    placeholder.innerHTML = `<p class="text-red-400 font-semibold text-center p-4">${error.message}</p>`;
+                }
+            } finally {
+                isProcessing = false;
+                hideLoadingOverlay();
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+                if (buttonText) buttonText.textContent = originalButtonText || translations.tr.generateConcepts;
+                if (startButton) startButton.disabled = (referenceImages.length === 0 && !planFile);
+                processAbortController = null;
+            }
+        };
+
+        window.openLightbox = (index) => {
+            const item = galleryItems.find(g => g && g.index === index);
+            if (!item || !item.imageUrl) return;
+            currentLightboxIndex = index;
+            
+            if (currentModule === 'material-list') {
+                 if (lightboxSlider) lightboxSlider.classList.add('hidden');
+                 if (lightboxImageSingle) lightboxImageSingle.classList.remove('hidden');
+                 if (lightboxImageSingle) lightboxImageSingle.src = item.imageUrl;
+            } else {
+                const beforeImageUrl = (currentModule === 'isometric-generation' && planFile) ? planFile.dataUrl : referenceImages[0]?.dataUrl;
+                if (beforeImageUrl) {
+                    if (lightboxImageSingle) lightboxImageSingle.classList.add('hidden');
+                    if (lightboxSlider) lightboxSlider.classList.remove('hidden');
+                    if (lightboxBeforeImage) lightboxBeforeImage.src = beforeImageUrl;
+                    if (lightboxAfterImage) lightboxAfterImage.src = item.imageUrl;
+                } else {
+                    if (lightboxSlider) lightboxSlider.classList.add('hidden');
+                    if (lightboxImageSingle) lightboxImageSingle.classList.remove('hidden');
+                    if (lightboxImageSingle) lightboxImageSingle.src = item.imageUrl;
+                }
+            }
+            
+            if (lightboxDownloadButton) lightboxDownloadButton.textContent = 'İndir';
+            if (lightboxDownloadButton) lightboxDownloadButton.disabled = false;
+            if (lightboxDownloadButton) lightboxDownloadButton.onclick = () => downloadImage(item.imageUrl, `${item.filename}.jpeg`);
+            
+            if (lightbox) lightbox.classList.remove('hidden');
+        };
+
+        window.closeLightbox = () => { 
+            if (lightbox) lightbox.classList.add('hidden'); 
+            if (lightboxBeforeImage) lightboxBeforeImage.src = "";
+            if (lightboxAfterImage) lightboxAfterImage.src = "";
+            if (lightboxImageSingle) lightboxImageSingle.src = "";
+            if (lightboxVideo) lightboxVideo.pause();
+            if (lightboxVideo) lightboxVideo.src = "";
+            currentLightboxIndex = -1; 
+        };
+        
+        window.navigateLightbox = (direction) => {
+            if (lightbox && lightbox.classList.contains('hidden')) return;
+            const validItems = galleryItems.filter(item => item && item.imageUrl).sort((a, b) => a.index - b.index);
+            if (validItems.length === 0) return;
+            
+            const currentIndexInValidArray = validItems.findIndex(item => item.index === currentLightboxIndex);
+            if (currentIndexInValidArray === -1) return;
+
+            let nextIndexInValidArray = currentIndexInValidArray + direction;
+            
+            if (nextIndexInValidArray >= validItems.length) nextIndexInValidArray = 0;
+            else if (nextIndexInValidArray < 0) nextIndexInValidArray = validItems.length - 1;
+
+            const newItem = validItems[nextIndexInValidArray];
+            if (newItem) openLightbox(newItem.index);
+        };
+
+        window.downloadImage = (dataUrl, filename) => {
+            const link = document.createElement('a');
+            link.href = dataUrl; link.download = filename;
+            document.body.appendChild(link);
+            link.click(); 
+            document.body.removeChild(link);
+        };
+        
+        window.clearColorSelection = () => {
+            selectedColor = null;
+            const colorPickerButton = document.getElementById('colorPickerButton');
+            if (colorPickerButton) {
+                colorPickerButton.style.backgroundColor = '';
+                colorPickerButton.innerHTML = `
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l.18.18a9 9 0 0 0 0 12.73L5 23l-2-2 7.27-7.27a9 9 0 0 0-2.54-2.54L2 15V9l5-1 1-5h6l-1 5z"></path><path d="M15 13.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path></svg>
+                    <span class="ml-2">Renk Seç</span>`;
+            }
+            const colorPaletteDialog = document.getElementById('color-palette-dialog');
+            if (colorPaletteDialog) colorPaletteDialog.classList.add('hidden');
+        }
+
+        // --- Internal Helper Functions ---
+        function addCheckmark(element) {
+            if (!element || element.querySelector('.selection-tick')) return;
+            const checkmarkSVG = `
+                <svg class="w-4 h-4 text-green-500 mr-2 selection-tick" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            `;
+            element.insertAdjacentHTML('afterbegin', checkmarkSVG);
+        }
+
+        function removeCheckmark(element) {
+            if (!element) return;
+            const checkmark = element.querySelector('.selection-tick');
+            if (checkmark) {
+                checkmark.remove();
+            }
+        }
+
+        function setupColorPalette() {
+            const dialog = document.getElementById('color-palette-dialog');
+            const grid = document.getElementById('color-grid');
+            const closeBtn = document.getElementById('color-palette-dialog-close');
+            const colorPickerButton = document.getElementById('colorPickerButton');
+
+            const colorPalette = [
+                '#4a148c', '#6a1b9a', '#8e24aa', '#ab47bc', '#ce93d8', '#e1bee7', '#f3e5f5', '#faf3fe',
+                '#0d47a1', '#1565c0', '#1e88e5', '#42a5f5', '#90caf9', '#bbdefb', '#e3f2fd', '#f3f8fe',
+                '#004d40', '#00695c', '#00897b', '#26a69a', '#80cbc4', '#b2dfdb', '#e0f2f1', '#f2f9f9',
+                '#1b5e20', '#2e7d32', '#43a047', '#66bb6a', '#a5d6a7', '#c8e6c9', '#e8f5e9', '#f4f9f4',
+                '#bf360c', '#d84315', '#f4511e', '#ff7043', '#ffab91', '#ffccbc', '#fbe9e7', '#fef6f5',
+                '#ff6f00', '#ff8f00', '#ffb300', '#ffd54f', '#ffe082', '#ffecb3', '#fff8e1', '#fffdf2',
+                '#880e4f', '#ad1457', '#d81b60', '#ec407a', '#f48fb1', '#f8bbd0', '#fce4ec', '#fef3f7',
+                '#263238', '#37474f', '#546e7a', '#78909c', '#b0bec5', '#cfd8dc', '#eceff1', '#f9fafb'
+            ];
+
+            if (grid) grid.innerHTML = '';
+            colorPalette.forEach(color => {
+                const colorBtn = document.createElement('button');
+                colorBtn.className = 'w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:border-white transition';
+                colorBtn.style.backgroundColor = color;
+                colorBtn.onclick = () => {
+                    selectedColor = color;
+                    if (colorPickerButton) {
+                        colorPickerButton.style.backgroundColor = color;
+                        colorPickerButton.innerHTML = `<span class="font-bold text-white mix-blend-difference">${color}</span>`;
+                    }
+                    if (dialog) dialog.classList.add('hidden');
+                };
+                if (grid) grid.appendChild(colorBtn);
+            });
+            
+            if (colorPickerButton) colorPickerButton.onclick = () => { if (dialog) dialog.classList.remove('hidden'); };
+            if (closeBtn) closeBtn.onclick = () => { if (dialog) dialog.classList.add('hidden'); };
+        }
+
+        function showMessage(title, content) {
+            if (messageTitle) messageTitle.innerHTML = title;
+            if (messageContent) messageContent.innerHTML = content;
+            if (messageBox) messageBox.classList.remove('hidden');
+        }
+        
+        function updateStartButtonText() {
+            const lang = currentLanguage;
+            const config = moduleMappings[currentModule];
+             if (config && buttonText) {
+                if (config.quantities && config.quantities.length > 0) {
+                    const baseText = translations[lang][config.btn];
+                    if (generationCount) {
+                        buttonText.innerHTML = `${generationCount} ${baseText}`;
+                    } else {
+                        buttonText.innerHTML = baseText;
+                    }
+                } else {
+                    buttonText.innerHTML = `${translations[lang][config.btn]}`;
+                }
+            }
+
+            let isDisabled = (referenceImages.length === 0 && !planFile) || isProcessing;
+            if (config && config.quantities && config.quantities.length > 0) {
+                if (generationCount === null) {
+                    isDisabled = true;
+                }
+            }
+            if (startButton) startButton.disabled = isDisabled;
+        }
+
+        function resetUIState() {
+            referenceImages = [];
+            planFile = null;
+            styleReferenceImage = null;
+            galleryItems = [];
+            selectedStyle = null;
+            selectedTime = null;
+            selectedWeather = null;
+            generationCount = null;
+            const textPromptInput = document.getElementById('textPromptInput');
+            if (textPromptInput) textPromptInput.value = '';
+            const ideasContainer = document.getElementById('prompt-ideas-container');
+            if (ideasContainer) {
+                ideasContainer.innerHTML = '';
+                ideasContainer.classList.add('hidden');
+            }
+            
+            document.querySelectorAll('.control-button, .style-button').forEach(btn => {
+                btn.classList.remove('active');
+                removeCheckmark(btn);
+            });
+            
+            if (imageUploadLabel) {
+                imageUploadLabel.style.opacity = '1';
+                imageUploadLabel.style.pointerEvents = 'auto';
+            }
+            if (planUploadLabel) {
+                planUploadLabel.style.opacity = '1';
+                planUploadLabel.style.pointerEvents = 'auto';
+            }
+
+            renderPreviews();
+            if (galleryPanel) galleryPanel.classList.add('hidden');
+            if (imageGallery) imageGallery.innerHTML = '';
+            if (uploadText) uploadText.innerHTML = translations[currentLanguage].uploadText;
+        }
+
+        function renderPreviews() {
+            // Main image previews
+            if (mainUploadPreviews) {
+                mainUploadPreviews.innerHTML = '';
+                if (referenceImages.length > 0) {
+                    if (imageUploadLabel) imageUploadLabel.classList.add('hidden');
+                    mainUploadPreviews.classList.remove('hidden');
+                    referenceImages.forEach(item => {
+                        const isPdfIcon = item.isPdf ? `<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg"><svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5.25008 1.50012H13.3101L18.7501 6.94012V20.2501C18.7501 21.4928 17.7429 22.5001 16.5001 22.5001H5.25008C4.00742 22.5001 3.00008 21.4928 3.00008 20.2501V3.75012C3.00008 2.50746 4.00742 1.50012 5.25008 1.50012ZM12.7501 8.25012H17.2501L12.0001 3.00012V7.50012C12.0001 7.91433 12.3359 8.25012 12.7501 8.25012Z"></path></svg></div>` : '';
+                        mainUploadPreviews.innerHTML += `
+                            <div class="relative w-28 h-28">
+                                <img src="${item.dataUrl}" class="w-full h-full object-cover rounded-lg shadow-md" alt="Referans Görsel">
+                                ${isPdfIcon}
+                                <button onclick="removeImage('${item.id}')" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg hover:bg-red-700 transition">&times;</button>
+                            </div>`;
+                    });
+                } else {
+                    if (imageUploadLabel) imageUploadLabel.classList.remove('hidden');
+                    mainUploadPreviews.classList.add('hidden');
+                }
+            }
+
+            // Plan file preview
+            if (planUploadPreviews) {
+                planUploadPreviews.innerHTML = '';
+                if (planFile) {
+                    if (planUploadLabel) planUploadLabel.classList.add('hidden');
+                    planUploadPreviews.classList.remove('hidden');
+                    const isPdfIcon = planFile.isPdf ? `<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg"><svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5.25008 1.50012H13.3101L18.7501 6.94012V20.2501C18.7501 21.4928 17.7429 22.5001 16.5001 22.5001H5.25008C4.00742 22.5001 3.00008 21.4928 3.00008 20.2501V3.75012C3.00008 2.50746 4.00742 1.50012 5.25008 1.50012ZM12.7501 8.25012H17.2501L12.0001 3.00012V7.50012C12.0001 7.91433 12.3359 8.25012 12.7501 8.25012Z"></path></svg></div>` : '';
+                    planUploadPreviews.innerHTML = `
+                        <div class="relative w-28 h-28">
+                            <img src="${planFile.dataUrl}" class="w-full h-full object-cover rounded-lg shadow-md" alt="Plan Dosyası">
+                            ${isPdfIcon}
+                            <button onclick="removePlan()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg hover:bg-red-700 transition">&times;</button>
+                        </div>`;
+                } else {
+                    if (planUploadLabel) planUploadLabel.classList.remove('hidden');
+                    planUploadPreviews.classList.add('hidden');
+                }
+            }
+
+
+            // Style reference preview
+            if (styleUploadPreviews) {
+                styleUploadPreviews.innerHTML = '';
+                if (styleReferenceImage) {
+                    if (styleReferenceUploadLabel) styleReferenceUploadLabel.classList.add('hidden');
+                    styleUploadPreviews.classList.remove('hidden');
+                    styleUploadPreviews.innerHTML = `
+                        <div class="relative w-28 h-28">
+                            <img src="${styleReferenceImage.dataUrl}" class="w-full h-full object-cover rounded-lg shadow-md" alt="Stil Referansı">
+                            <button onclick="removeStyleReference()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg hover:bg-red-700 transition">&times;</button>
+                        </div>
+                    `;
+                } else {
+                    if (styleReferenceUploadLabel) styleReferenceUploadLabel.classList.remove('hidden');
+                    styleUploadPreviews.classList.add('hidden');
+                }
+            }
+            
+            updateStartButtonText();
+        }
+
+        function updateGenericUploadState() {
+            if (startButton) startButton.disabled = (referenceImages.length === 0 && !planFile) || isProcessing;
+            updateStartButtonText();
+        }
+        
+        function resizeAndGetBase64(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (readerEvent) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX_SIZE = 1920;
+                    let { width, height } = img;
+                    if (width > MAX_SIZE || height > MAX_SIZE) {
+                        if (width > height) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+                        else { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    callback(resizedDataUrl.split(',')[1], resizedDataUrl);
+                };
+                img.src = readerEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        async function exponentialBackoffFetch(url, options, maxRetries = 5) {
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    // Immediately throw if the signal is already aborted before making the call.
+                    if (options.signal && options.signal.aborted) {
+                        throw new DOMException('İşlem iptal edildi', 'AbortError');
+                    }
+
+                    const response = await fetch(url, options);
+
+                    // Handle rate limiting (429) before checking for other errors.
+                    if (response.status === 429 && attempt < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000 + Math.random() * 1000));
+                        continue;
+                    }
+
+                    // Handle other non-ok responses.
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Hatası: ${response.status} - ${errorData.error?.message || response.statusText}`);
+                    }
+
+                    return response;
+                } catch (error) {
+                    // If the fetch was aborted, re-throw the error immediately to stop retries.
+                    if (error.name === 'AbortError') {
+                        throw error;
+                    }
+
+                    // If it's the last attempt for any other error, re-throw.
+                    if (attempt === maxRetries - 1) {
+                        throw error;
+                    }
+
+                    // Wait before the next retry for non-abort errors.
+                    console.warn(`API çağrısı denemesi ${attempt + 1} başarısız oldu. Tekrar deneniyor...`, error);
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000 + Math.random() * 1000));
+                }
+            }
+        }
+
+        async function processStaticImages(abortSignal) {
+            const config = moduleMappings[currentModule];
+            const totalRenders = (config.quantities && config.quantities.length > 0) ? generationCount : 1;
+            
+            if (buttonText) buttonText.textContent = translations[currentLanguage].analyzing;
+            
+            let promptsData;
+            let moduleTitle = currentModule?.replace(/-(ext|int)$/, '');
+            
+            if (currentModule === 'material-list') {
+                await generateMaterialSheetDirectly(abortSignal);
+                return;
+            }
+
+            switch(currentModule) {
+                case 'concept-engine': promptsData = await analyzeWithStyleRef(`You are a world-class architectural designer. Generate ${totalRenders} diverse design concepts. CRITICAL RULE: You MUST preserve the core geometry and camera angle of the PRIMARY image. If a style reference image is provided, you MUST apply its style (materials, mood, colors, lighting, artistic direction) to the primary image's geometry. If no style reference is given, create diverse styles on your own.`, totalRenders, abortSignal); break;
+                case 'concept-engine-prompt': promptsData = await analyzeForEditPrompts(abortSignal); break;
+                case 'time-conversion': promptsData = await callPromptGeneratorAPI(`You are a digital environment artist. Re-render the provided image to match the time of day: '${selectedTime}'. CRITICAL: Do NOT change the architecture, camera angle, or weather. Only change the lighting and sky to reflect the specified time of day.`, 1, abortSignal); break;
+                case 'weather-transition': promptsData = await analyzeForWeatherTransition(abortSignal); break;
+                case 'facade-generation': promptsData = await analyzeForFacadeGeneration(abortSignal); break;
+                case 'isometric-generation': promptsData = await analyzeForIsometricGeneration(abortSignal); break;
+                case 'upscale': promptsData = await analyzeForUpscalingPrompts(abortSignal); break;
+                case 'plan-coloring': promptsData = await analyzeForPlanColoringPrompts(abortSignal); break;
+                default: promptsData = [{prompt: "Generate a standard render based on the image."}]; break;
+            }
+            
+            if (abortSignal.aborted) return;
+            
+            if (galleryPanel) galleryPanel.classList.remove('hidden');
+            if (galleryTitle) galleryTitle.textContent = translations[currentLanguage].galleryTitle(moduleTitle, totalRenders);
+            if (imageGallery) imageGallery.innerHTML = '';
+            
+            const promises = promptsData.map((item, index) => generateImage(item.prompt, index, totalRenders, abortSignal));
+            const results = await Promise.allSettled(promises);
+
+            const successfulRenders = results.filter(r => r.status === 'fulfilled').length;
+            
+            if (isProcessing && successfulRenders > 0) {
+                showMessage(translations[currentLanguage].successMsg, translations[currentLanguage].successRender(successfulRenders));
+            } else if (isProcessing) {
+                showMessage(translations[currentLanguage].errorOccurred, "Hiçbir görsel oluşturulamadı. Lütfen tekrar deneyin veya farklı bir görsel kullanın.");
+            }
+        }
+        
+        async function analyzeWithStyleRef(baseSystemPrompt, count, abortSignal) {
+            const finalSystemPrompt = `${baseSystemPrompt} Output a single JSON array of ${count} objects, each with 'prompt'.`;
+            return callPromptGeneratorAPI(finalSystemPrompt, count, abortSignal);
+        }
+
+        async function analyzeForFacadeGeneration(abortSignal) {
+            const count = generationCount || 4;
+            const systemPrompt = `You are an expert architectural visualization AI. Your task is to generate ${count} DISTINCT and DIVERSE camera angles of the building in the provided image. CRITICAL RULES: 1. You MUST NOT alter the architectural design, materials, colors, or environment. 2. Each output must be a photorealistic render of the EXACT SAME building. 3. Each render must be from a UNIQUE perspective. Avoid similar shots. Generate a variety of views like front elevation, side elevation, worm's-eye view, bird's-eye view, dramatic corner shots, and eye-level street views. Generate ${count} concise English prompts, one for each new, unique view.`;
+            return callPromptGeneratorAPI(systemPrompt, count, abortSignal);
+        }
+
+        async function analyzeForIsometricGeneration(abortSignal) {
+            const count = generationCount || 1;
+            let systemPrompt;
+            if (planFile) {
+                systemPrompt = `You are an expert architect. You have been given a 2D floor plan/drawing. Your task is to extrude this plan into a photorealistic 3D isometric render. Faithfully represent the walls, rooms, windows, and doors shown in the plan. If furniture is indicated, render it. Add appropriate roofing. If landscaping or other context is present in the plan, include it, otherwise, do not invent it. Generate ${count} concise English prompts for creating varied, high-quality isometric views based on this plan.`;
+            } else {
+                 systemPrompt = `You are an expert architectural 3D artist. You are given a single facade/elevation view of a building. Your task is to interpret this 2D view and generate a full 3D isometric render of the entire building. Extrapolate the other sides and the roof in a style consistent with the provided facade. If context like trees, people, or vehicles exists in the source image, include them in the render, scaled appropriately. If not present, do not add them. Generate ${count} concise English prompts for this task.`;
+            }
+             return callPromptGeneratorAPI(systemPrompt, count, abortSignal);
+        }
+
+        async function generateMaterialSheetDirectly(abortSignal) {
+            const tempId = 'material-sheet-placeholder';
+            const placeholder = document.createElement('div');
+            placeholder.id = tempId;
+            placeholder.className = "relative container-card p-4 flex flex-col items-center justify-center h-48 bg-gray-900 rounded-xl animate-pulse";
+            placeholder.innerHTML = `<svg class="h-8 w-8 text-emerald-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-4 text-sm font-medium text-emerald-400">Malzeme paftası hazırlanıyor...</p>`;
+            if (galleryPanel) galleryPanel.classList.remove('hidden');
+            if (galleryTitle) galleryTitle.textContent = "Malzeme Paftası";
+            if (imageGallery) imageGallery.innerHTML = '';
+            if (imageGallery) imageGallery.appendChild(placeholder);
+
+            try {
+                if (buttonText) buttonText.textContent = "Pafta Oluşturuluyor...";
+
+                const systemPrompt = `You are an expert architectural visualization AI. Your task is to create a professional material board based on the provided building render.
+                CRITICAL INSTRUCTIONS:
+                1. Create a new, clean, high-resolution image layout (a "pafta").
+                2. On the left half of the layout, place the original building render you were given.
+                3. On the right half, identify between 4 and 12 main materials from the original render. For each material you identify:
+                    a. Create a small, photorealistic, square texture swatch.
+                    b. Below the swatch, write the material's name in clear, correct TURKISH (e.g., "Ahşap Cephe Paneli", "Beton Zemin").
+                    c. Below the name, write the material's general color in TURKISH (e.g., "(Açık Kahverengi)", "(Gri)").
+                4. Arrange the swatches and their labels neatly in a two-column grid.
+                5. If you can only identify fewer than 4 materials, supplement the list with suitable, alternative materials to reach at least 12 total materials, and create swatches for them as well.
+                6. The final output MUST be a single image file containing this complete board.`;
+                
+                const imageParts = [];
+                referenceImages.forEach(data => { imageParts.push({ inlineData: { mimeType: "image/jpeg", data: data.base64 } }); });
+
+                const payload = { 
+                    contents: [{ parts: [{ text: systemPrompt }, ...imageParts] }], 
+                    generationConfig: { responseModalities: ["IMAGE"] } 
+                };
+
+                const response = await exponentialBackoffFetch(IMAGE_GEN_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload),
+                    signal: abortSignal
+                });
+                
+                const result = await response.json();
+                const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                
+                if (!base64Data) {
+                    throw new Error('Malzeme paftası görseli oluşturulamadı. Model beklenen formatta yanıt vermedi.');
+                }
+
+                const finalImageUrl = `data:image/png;base64,${base64Data}`;
+                galleryItems[0] = { index: 0, imageUrl: finalImageUrl, filename: `malzeme_paftasi_1` };
+                renderGalleryCard(galleryItems[0], tempId);
+
+                showMessage(translations[currentLanguage].successMsg, "Malzeme paftası başarıyla oluşturuldu!");
+
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error("Material sheet generation error:", error);
+                    if (placeholder) placeholder.innerHTML = `<p class="text-red-400 font-semibold text-center p-4">Pafta oluşturulamadı: ${error.message}</p>`;
+                } else {
+                    if (placeholder) placeholder.remove();
+                }
+            }
+        }
+        
+        async function analyzeForUpscalingPrompts(abortSignal) {
+            const systemPrompt = `You are an AI image processing specialist focused on super-resolution. Analyze the provided image. Your sole task is to upscale the image's resolution by a factor of ${upscaleFactor}x. CRITICAL RULES: 1. DO NOT alter the composition, subject, colors, or artistic style of the original image. 2. Focus exclusively on increasing pixel density, removing compression artifacts and noise, and intelligently sharpening existing details. 3. The output must be a photorealistic, high-resolution version of the exact same image. Generate a single, concise English prompt that commands this upscaling process.`;
+            return callPromptGeneratorAPI(systemPrompt, 1, abortSignal);
+        }
+
+        async function analyzeForEditPrompts(abortSignal) {
+            const userEditPrompt = document.getElementById('textPromptInput')?.value || '';
+            const systemPrompt = `You are an expert photo editor AI. You will be given a primary image, a user's text instruction, and optionally a style reference image. Your task is to apply the text instruction ("${userEditPrompt}") to the primary image. If a style reference is also provided, the edit should incorporate its artistic style. Generate a single, highly descriptive prompt that achieves this.`;
+            return callPromptGeneratorAPI(systemPrompt, 1, abortSignal);
+        }
+
+        async function analyzeForWeatherTransition(abortSignal) {
+            const userEditPrompt = document.getElementById('textPromptInput')?.value || '';
+            let basePrompt = `You are a digital environment artist. Re-render the provided image. CRITICAL: Do NOT change the architecture or camera angle. Only change the lighting, sky, and environmental effects.`;
+
+            if (selectedWeather) {
+                basePrompt += ` The main goal is to transform the scene to a '${selectedWeather}' weather condition.`
+            }
+            if (userEditPrompt.trim()) {
+                basePrompt += ` Additionally, apply the following specific user instructions: '${userEditPrompt.trim()}'`;
+            }
+
+            const systemPrompt = `${basePrompt} Generate a single, highly descriptive English prompt that encapsulates this entire task.`;
+            return callPromptGeneratorAPI(systemPrompt, 1, abortSignal);
+        }
+        
+        async function analyzeForPlanColoringPrompts(abortSignal) {
+            let basePrompt = `You are an expert architectural colorist. Analyze the provided black and white floor plan. Your task is to color it photorealistically. Add appropriate furniture, flooring, textures, and lighting based on the room labels. Preserve the original line work and layout perfectly.`;
+            if (styleReferenceImage) {
+                basePrompt += ` The style, materials, and color palette of the final colored plan MUST be heavily inspired by the provided style reference image.`;
+            } else if (selectedColor) {
+                basePrompt += ` CRITICAL INSTRUCTION: The overall color scheme must be heavily influenced by the hex color ${selectedColor}.`;
+            }
+            const systemPrompt = `${basePrompt} Generate a single, concise English prompt that encapsulates this task.`;
+            return callPromptGeneratorAPI(systemPrompt, 1, abortSignal);
+        }
+
+        async function callPromptGeneratorAPI(systemPrompt, count, abortSignal) {
+            const imageBase64Array = (currentModule === 'isometric-generation' && planFile) ? [planFile.base64] : referenceImages.map(img => img.base64);
+
+            const contentsParts = [];
+
+            let initialText = "Analyze the provided architectural visual(s).";
+            if (styleReferenceImage) {
+                initialText = "Analyze the primary architectural visual(s) and use the subsequent image as a style reference.";
+            }
+            contentsParts.push({ text: initialText });
+            
+            imageBase64Array.forEach(data => { 
+                contentsParts.push({ inlineData: { mimeType: "image/jpeg", data: data } }); 
+            });
+            
+            if (styleReferenceImage) {
+                contentsParts.push({ inlineData: { mimeType: "image/jpeg", data: styleReferenceImage.base64 } });
+            }
+
+            let finalSystemPromptText = systemPrompt;
+            if (selectedStyle && (currentModule === 'concept-engine' || currentModule === 'concept-engine-prompt')) {
+                finalSystemPromptText += ` CRITICAL INSTRUCTION: The final design must strictly adhere to the '${selectedStyle}' architectural style.`;
+            }
+             // Add the generic output instruction only if it's NOT the material-list module
+            if (currentModule !== 'material-list') {
+                finalSystemPromptText += ` Output a single JSON array of ${count} objects, each with 'prompt'.`;
+            }
+
+            const payload = {
+                contents: [{ role: "user", parts: contentsParts }],  
+                systemInstruction: { parts: [{ text: finalSystemPromptText }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: { type: "ARRAY", items: { type: "OBJECT", properties: { "prompt": { "type": "STRING" } } } }
+                }
+            };
+
+            if (currentModule === 'material-list') {
+                 payload.generationConfig.responseSchema = { 
+                     type: "ARRAY", 
+                     items: { 
+                         type: "OBJECT", 
+                         properties: { 
+                             "name": { "type": "STRING" }, 
+                             "color": { "type": "STRING" }, 
+                             "swatchPrompt": { "type": "STRING" }  
+                         } 
+                     } 
+                 };
+            }
+
+
+            const response = await exponentialBackoffFetch(GEMINI_API_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload),
+                signal: abortSignal
+            });
+            const result = await response.json();
+            const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!jsonText) throw new Error("The analysis model did not return the expected JSON format.");
+            return JSON.parse(jsonText);
+        }
+
+        async function generateImage(prompt, index, total, abortSignal) {
+            if (buttonText) buttonText.textContent = translations[currentLanguage].generating(index + 1, total);
+            const tempId = `temp-${index}`;
+            const placeholder = document.createElement('div');
+            placeholder.id = tempId;
+            placeholder.className = "relative container-card p-4 flex flex-col items-center justify-center h-48 bg-gray-900 rounded-xl animate-pulse";
+            placeholder.innerHTML = `<svg class="h-8 w-8 text-emerald-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-4 text-sm font-medium text-emerald-400">${translations[currentLanguage].renderGenerating(index + 1)}</p>`;
+            if (imageGallery) imageGallery.appendChild(placeholder);
+
+            const imageBase64Array = (currentModule === 'isometric-generation' && planFile) ? [planFile.base64] : referenceImages.map(img => img.base64);
+            const imageParts = [];
+            
+            imageBase64Array.forEach(data => { imageParts.push({ inlineData: { mimeType: "image/jpeg", data: data } }); 
+            });
+            
+            if (styleReferenceImage) { imageParts.push({ inlineData: { mimeType: "image/jpeg", data: styleReferenceImage.base64 } });
+            }
+            
+            let finalPrompt = prompt;
+            
+            const payload = { contents: [{ parts: [{ text: finalPrompt }, ...imageParts] }], generationConfig: { responseModalities: ["IMAGE"] } };
+            try {
+                const response = await exponentialBackoffFetch(IMAGE_GEN_API_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload),
+                    signal: abortSignal
+                });
+                const result = await response.json();
+                const candidate = result?.candidates?.[0];
+                const mediaPart = candidate?.content?.parts?.find(p => p.inlineData);
+                const base64Data = mediaPart?.inlineData?.data;
+
+                if (base64Data) {
+                    const mimeType = mediaPart?.inlineData?.mimeType || 'image/png';
+                    const mediaUrl = `data:${mimeType};base64,${base64Data}`;
+                    galleryItems[index] = { index, imageUrl: mediaUrl, prompt, filename: `sonuc_${index + 1}` };
+                    renderGalleryCard(galleryItems[index], tempId);
+                    return Promise.resolve();
+                } else {
+                    const finishReason = candidate?.finishReason;
+                    const textPart = candidate?.content?.parts?.find(p => p.text);
+                    let errorMessage = `Görsel #${index + 1} oluşturulamadı.`;
+                    if (finishReason && finishReason !== 'STOP') {
+                        errorMessage += ` Sebep: ${finishReason}.`;
+                    }
+                    if (textPart?.text) {
+                        errorMessage += ` Detaylar: ${textPart.text}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    const tempElement = document.getElementById(tempId);
+                     if(tempElement) {
+                         tempElement.remove();
+                     }
+                    throw error;
+                }
+                console.error(error);
+                const tempElement = document.getElementById(tempId);
+                if(tempElement) {
+                    tempElement.innerHTML = `<div class="text-red-400 text-xs text-center p-2">${error.message}</div>`;
+                    tempElement.classList.remove('animate-pulse', 'h-48', 'items-center', 'justify-center'); 
+                    tempElement.classList.add('h-auto');
+                }
+                return Promise.reject(error);
+            }
+        }
+
+
+        function renderGalleryCard(item, replaceId) {
+            const card = document.createElement('div');
+            card.id = `card-${item.index}`;
+            card.className = "group container-card p-2 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/20 transform hover:-translate-y-1 transition-all duration-300";
+            
+            const viewIcon = `<svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 group-hover:scale-110 transform transition-all duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0"></path><path d="M21 12c-2.2 4.9-6.3 8-10 8s-7.8-3.1-10-8c2.2-4.9 6.3-8 10-8s7.8 3.1 10 8Z"></path></svg>`;
+            
+            card.innerHTML = `
+                <div class="relative w-full h-48 rounded-lg overflow-hidden cursor-pointer" onclick="openLightbox(${item.index})">
+                    <img src="${item.imageUrl}" alt="${item.filename}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-40 transition duration-300 flex items-center justify-center">
+                        ${viewIcon}
+                    </div>
+                </div>
+                <div class="p-2 text-center">
+                    <p class="text-sm font-semibold text-gray-300 truncate">${item.filename}</p>
+                    <button onclick="downloadImage('${item.imageUrl}', '${item.filename}.jpeg')" class="mt-2 w-full py-2 text-xs bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition" data-translate-key="downloadButton">${translations[currentLanguage].downloadButton}</button>
+                </div>`;
+            const elementToReplace = document.getElementById(replaceId);
+            if (elementToReplace) elementToReplace.replaceWith(card);
+            else if (imageGallery) imageGallery.appendChild(card);
+        }
+        
+        function populateStyleButtons() {
+            const container = styleSelectorContainer?.querySelector('div');
+            if (!container) return;
+
+            container.innerHTML = '';
+            architecturalStyles.forEach(style => {
+                const btn = document.createElement('button');
+                btn.className = 'control-button style-button text-xs';
+                btn.dataset.style = style.key;
+                btn.textContent = style.name;
+                btn.onclick = () => window.selectStyle(style.key, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        let currentTheme = 'dark';
+        window.setTheme = (theme) => {
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            updateThemeUI();
+        }
+
+        window.toggleTheme = (event) => {
+            setTheme(event.target.checked ? 'light' : 'dark');
+        }
+
+        function updateThemeUI() {
+            if (currentTheme === 'light') {
+                document.body.classList.add('light-mode');
+                if (themeToggle) themeToggle.checked = true;
+            } else {
+                document.body.classList.remove('light-mode');
+                if (themeToggle) themeToggle.checked = false;
+            }
+        }
+
+        function applyInitialTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // ORİJİNAL TEMA: Dark
+            setTheme(savedTheme);
+        }
+        
+        function showLoadingOverlay(duration) {
+            document.querySelectorAll('.module-button').forEach(btn => btn.disabled = true);
+            const overlay = document.getElementById('loading-overlay');
+            const timerText = document.getElementById('timer-text');
+            const progressCircle = document.getElementById('timer-progress');
+            const cancelBtn = document.getElementById('cancel-process-btn');
+            const loadingText = document.querySelector('#loading-overlay p');
+
+            // Reset for a new process
+            if (cancelBtn) cancelBtn.disabled = false;
+            if (loadingText) loadingText.textContent = "İşlem Sürüyor...";
+            if (progressCircle) {
+                progressCircle.classList.remove('text-emerald-500');
+                progressCircle.classList.add('text-red-500');
+                progressCircle.style.animation = 'none';
+                void progressCircle.offsetWidth; // Trigger reflow
+                progressCircle.style.animation = `countdown-circle ${duration}s linear forwards`;
+            }
+            if (overlay) overlay.classList.remove('hidden');
+
+
+            let remaining = duration;
+            if (timerText) timerText.textContent = `${remaining}s`;
+            if (timerText) timerText.className = 'absolute inset-0 flex items-center justify-center text-4xl font-bold'; // Reset class
+
+            countdownInterval = setInterval(() => {
+                remaining--;
+                if (remaining > 0) {
+                    if (timerText) timerText.textContent = `${remaining}s`;
+                } else {
+                    if (timerText) timerText.textContent = "Bitmek üzere";
+                    if (timerText) timerText.className = 'absolute inset-0 flex items-center justify-center text-lg font-bold px-2'; // Change class for text
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        function hideLoadingOverlay() {
+            clearInterval(countdownInterval);
+            document.querySelectorAll('.module-button').forEach(btn => btn.disabled = false);
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+            const progressCircle = document.getElementById('timer-progress');
+            if (progressCircle) progressCircle.style.animation = 'none'; // Stop animation
+        }
+        
+        // --- Event Listeners & Initializers ---
+
+        if (messageCloseButton) messageCloseButton.onclick = () => { if (messageBox) messageBox.classList.add('hidden'); };
+        
+        if (lightbox) lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+        document.addEventListener('keydown', (e) => {
+             if (lightbox && lightbox.classList.contains('hidden')) return;
+             if (e.key === 'Escape') closeLightbox();
+             if (e.key === 'ArrowLeft') navigateLightbox(-1);
+             if (e.key === 'ArrowRight') navigateLightbox(1);
+        });
+
+        function initializeApp() {
+            const mainAppContainer = document.getElementById('main-app-container');
+            if(mainAppContainer) mainAppContainer.classList.remove('hidden');
+            applyInitialTheme();
+            populateStyleButtons();
+            setupColorPalette();
+            showModuleSelection();
+        }
+
+        window.onload = () => {
+             initializeApp();
+        };
+    </script>
+</body>
+</html>
+
