@@ -1652,29 +1652,22 @@
             reader.readAsDataURL(file);
         }
         
-        async function exponentialBackoffFetch(url, options, maxRetries = 5) {
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                try {
-                    // Immediately throw if the signal is already aborted before making the call.
-                    if (options.signal && options.signal.aborted) {
-                        throw new DOMException('İşlem iptal edildi', 'AbortError');
-                    }
+        async function exponentialBackoffFetch(model, payload, abortSignal) {
+    // Bu fonksiyon artık kendi sunucusuz fonksiyonumuza istek atacak
+    const response = await fetch('/.netlify/functions/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, payload }),
+        signal: abortSignal,
+    });
 
-                    const response = await fetch(url, options);
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API Hatası: ${response.status} - ${errorData.error?.message || response.statusText}`);
+    }
 
-                    // Handle rate limiting (429) before checking for other errors.
-                    if (response.status === 429 && attempt < maxRetries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000 + Math.random() * 1000));
-                        continue;
-                    }
-
-                    // Handle other non-ok responses.
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(`API Hatası: ${response.status} - ${errorData.error?.message || response.statusText}`);
-                    }
-
-                    return response;
+    return response; // response'u doğrudan geri döndür
+}
                 } catch (error) {
                     // If the fetch was aborted, re-throw the error immediately to stop retries.
                     if (error.name === 'AbortError') {
@@ -2132,5 +2125,6 @@
     </script>
 </body>
 </html>
+
 
 
