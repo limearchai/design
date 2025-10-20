@@ -1269,7 +1269,7 @@
                     return; 
                 }
 
-                const ideas = await callPromptGeneratorAPI(systemPrompt, 5); 
+                const response = await exponentialBackoffFetch('gemini', payload, abortSignal);
                 
                 if (ideas && ideas.length > 0) {
                     ideas.forEach(idea => {
@@ -2125,6 +2125,7 @@
     </script>
 </body>
 </html>
+
 
 
 
