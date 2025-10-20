@@ -1720,7 +1720,7 @@
             
             const promises = promptsData.map((item, index) => generateImage(item.prompt, index, totalRenders, abortSignal));
             const results = await Promise.allSettled(promises);
-
+            const response = await exponentialBackoffFetch('imagen', payload, abortSignal);
             const successfulRenders = results.filter(r => r.status === 'fulfilled').length;
             
             if (isProcessing && successfulRenders > 0) {
@@ -2125,6 +2125,7 @@
     </script>
 </body>
 </html>
+
 
 
 
