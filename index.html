@@ -1696,7 +1696,7 @@
             let moduleTitle = currentModule?.replace(/-(ext|int)$/, '');
             
             if (currentModule === 'material-list') {
-                await generateMaterialSheetDirectly(abortSignal);
+                await generateMaterialSheetDirectly('imagen', payload, abortSignal);
                 return;
             }
 
@@ -2125,6 +2125,7 @@
     </script>
 </body>
 </html>
+
 
 
 
