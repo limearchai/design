@@ -716,9 +716,7 @@
         let processAbortController = null;
         
         const API_KEY = ""; // If you want to use models other than gemini-2.5-flash-preview-05-20 or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
         const IMAGE_GEN_MODEL = "gemini-2.5-flash-image-preview";
-        const IMAGE_GEN_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GEN_MODEL}:generateContent?key=${API_KEY}`;
         
         const moduleMappings = {
             'concept-engine': { title: 'conceptEngineTitle', desc: 'conceptEngineDesc', btn: 'generateConcepts', quantities: [1, 2, 5, 10], style: true },
@@ -2134,4 +2132,5 @@
     </script>
 </body>
 </html>
+
 
